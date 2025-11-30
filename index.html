@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>V-Store | Premium NFR Collection</title>
+    
+    <!-- Import "Outfit" Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- RESET & BASICS (Apple/Dark Style) --- */
+        :root {
+            --bg-color: #000000;
+            --text-color: #f5f5f7;
+            --accent-color: #2997ff; /* Apple Blue */
+            --glass-bg: rgba(22, 22, 23, 0.8);
+            --card-bg: #1d1d1f;
+            --input-bg: #2c2c2e;
+            --chat-user-bg: #007aff;
+            --chat-bot-bg: #3a3a3c;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            
+            /* Payment Colors */
+            --wechat-green: #07c160;
+            --alipay-blue: #1677ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden; /* Hide standard scrollbar */
+            letter-spacing: 0.5px; 
+        }
+
+        /* Starfield Canvas Style */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; 
+            background: #000; 
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-container {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            z-index: 1000;
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            gap: 20px;
+            padding: 0 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .nav-links::-webkit-scrollbar { display: none; }
+
+        .nav-links li {
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            color: #86868b;
+            transition: color 0.3s ease;
+            flex-shrink: 0;
+        }
+        .nav-links li.active { color: var(--text-color); }
+
+        .nav-login-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-left: auto;
+            flex-shrink: 0;
+            /* RESTORED: Visible Sign In Button */
+            display: block; 
+        }
+        .nav-login-btn:hover { background-color: rgba(255, 255, 255, 0.2); }
+
+        /* --- MAIN CONTAINER --- */
+        .main-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        /* --- SECTION STYLING --- */
+        section {
+            height: 100vh;
+            width: 100%;
+            max-width: 1200px; 
+            margin: 0 auto;    
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px 20px 20px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease;
+            position: relative;
+            background: transparent; 
+        }
+        section.visible { opacity: 1; }
+
+        h1 { font-size: 40px; font-weight: 700; margin-bottom: 10px; letter-spacing: -1px; }
+        h2 { font-size: 24px; font-weight: 600; color: #86868b; margin-bottom: 30px; }
+        p { font-size: 16px; line-height: 1.5; color: #86868b; max-width: 600px; }
+
+        /* --- 1. INTRO --- */
+        #introduction { background: transparent; }
+        .hero-image {
+            width: 160px; height: 160px;
+            background: linear-gradient(135deg, #2997ff, #007aff);
+            border-radius: 40px; 
+            margin-bottom: 30px;
+            box-shadow: 0 0 50px rgba(41, 151, 255, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 60px;
+        }
+
+        /* --- 3D CARD DISPLAY --- */
+        #cardDisplayPage {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.4s ease;
+            perspective: 1200px; /* Increased perspective for better depth perception */
+        }
+
+        .card-scene {
+            width: 300px;
+            height: 420px;
+            position: relative;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+        }
+        .card-scene:active { cursor: grabbing; }
+
+        .card-object {
+            width: 100%; height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            /* No border radius here, handled by faces */
+        }
+
+        /* Common face styles */
+        .card-face {
+            position: absolute;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center;
+            background: white;
+            /* A small border helps hide seams */
+            border: 1px solid #ccc;
+        }
+
+        /* FRONT FACE */
+        .card-face.front {
+            width: 100%; height: 100%;
+            transform: translateZ(10px); /* Half of the 20px thickness */
+            z-index: 10;
+            padding: 30px;
+            background: linear-gradient(135deg, #d1d1d1 0%, #ffffff 20%, #a8a8a8 40%, #e6e6e6 50%, #ffffff 60%, #a8a8a8 80%, #d1d1d1 100%);
+            border: 2px solid rgba(255,255,255,0.6);
+            box-shadow: inset 0 0 30px rgba(255,255,255,0.8);
+        }
+        .card-face.front::after {
+            content: ""; position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(125deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0.6) 45%, rgba(255,255,255,0) 55%, rgba(255,255,255,0) 100%);
+            border-radius: 18px; pointer-events: none;
+        }
+
+        /* BACK FACE */
+        .card-face.back {
+            width: 100%; height: 100%;
+            transform: rotateY(180deg) translateZ(10px); /* Half of the 20px thickness */
+            padding: 30px;
+            background: linear-gradient(135deg, #e0e0e0, #ffffff);
+            color: #333;
+            border: 4px solid #fff;
+            z-index: 10;
+        }
+
+        /* NEW: SIDE FACES FOR REALISTIC THICKNESS (20px thick slab) */
+        .card-edge {
+            position: absolute;
+            background: linear-gradient(90deg, #888, #ccc, #888); /* Metallic edge look */
+            border: 1px solid #777;
+            backface-visibility: hidden;
+        }
+
+        .card-edge.right {
+            width: 20px; /* Thickness */
+            height: 100%;
+            top: 0; right: -10px; /* Position on the right edge */
+            transform: rotateY(90deg);
+        }
+
+        .card-edge.left {
+            width: 20px; /* Thickness */
+            height: 100%;
+            top: 0; left: -10px; /* Position on the left edge */
+            transform: rotateY(-90deg);
+        }
+
+        .card-edge.top {
+            width: 100%;
+            height: 20px; /* Thickness */
+            top: -10px; /* Position on the top edge */
+            left: 0;
+            transform: rotateX(90deg);
+        }
+
+        .card-edge.bottom {
+            width: 100%;
+            height: 20px; /* Thickness */
+            bottom: -10px; /* Position on the bottom edge */
+            left: 0;
+            transform: rotateX(-90deg);
+        }
+
+        /* --- 2. FAQ & AGENT --- */
+        #faq { background-color: transparent; }
+        .faq-wrapper { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .faq-item { 
+            background-color: rgba(29, 29, 31, 0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 20px 25px; 
+            text-align: left; cursor: pointer; transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+        .faq-item:hover { background-color: rgba(255,255,255,0.1); transform: translateX(5px); }
+        
+        .faq-question { font-weight: 500; color: #fff; display: flex; justify-content: space-between; font-size: 16px; letter-spacing: 0.5px; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, margin-top 0.3s ease; color: #a1a1a6; font-size: 14px; line-height: 1.6; }
+        .faq-item.active .faq-answer { max-height: 100px; margin-top: 15px; }
+        .faq-item.active .faq-question span { transform: rotate(45deg); display:inline-block; transition: transform 0.3s; color: var(--accent-color); }
+
+        /* AGENT TRIGGER */
+        .agent-trigger {
+            margin-top: 40px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 15px 30px; border-radius: 30px; 
+            cursor: pointer; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 10px;
+            transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .agent-trigger:hover { background: var(--accent-color); border-color: var(--accent-color); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(41, 151, 255, 0.4); }
+
+        /* LIVE CHAT WINDOW STYLES */
+        .live-chat-window {
+            position: fixed;
+            bottom: 20px; right: 20px;
+            width: 320px; height: 450px;
+            background: #1c1c1e;
+            border-radius: 18px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            display: none; flex-direction: column;
+            z-index: 2000; overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 15px; background: #2c2c2e; border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .agent-info { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+        .agent-avatar { width: 30px; height: 30px; background: #34c759; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .close-chat { background: none; border: none; color: #888; cursor: pointer; font-size: 18px; }
+
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #000; }
+        .chat-msg { max-width: 80%; padding: 8px 12px; border-radius: 14px; font-size: 13px; line-height: 1.4; }
+        .msg-agent { background: var(--chat-bot-bg); align-self: flex-start; border-bottom-left-radius: 4px; color: #fff; }
+        .msg-user { background: var(--chat-user-bg); align-self: flex-end; border-bottom-right-radius: 4px; color: #fff; }
+        
+        .chat-footer { padding: 10px; background: #1c1c1e; border-top: 1px solid #333; display: flex; gap: 8px; }
+        .chat-input { flex: 1; background: #2c2c2e; border: none; padding: 8px 12px; border-radius: 15px; color: white; outline: none; font-size: 13px; }
+        .chat-send { background: var(--accent-color); border: none; width: 32px; height: 32px; border-radius: 50%; color: white; cursor: pointer; font-weight: bold; }
+
+        /* --- 3. SHOP --- */
+        #purchase { background-color: transparent; }
+        
+        .shop-container { display: flex; align-items: center; justify-content: center; gap: 20px; width: 100%; max-width: 550px; padding: 0 10px; }
+        .product-card { background-color: var(--card-bg); border-radius: 18px; padding: 30px; flex: 1; width: auto; transition: transform 0.3s ease, opacity 0.3s ease; position: relative; z-index: 2; }
+        
+        .nav-arrow { background: rgba(255, 255, 255, 0.1); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 20px; cursor: pointer; transition: all 0.2s; position: relative; flex-shrink: 0; z-index: 3; display: flex; align-items: center; justify-content: center; }
+        .nav-arrow:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.1); }
+
+        .blind-box { width: 100%; height: 200px; background-color: #2c2c2e; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 60px; color: #555; }
+        .price-tag { font-size: 24px; font-weight: 600; margin-bottom: 20px; display: block; }
+        
+        .buy-btn { 
+            background: linear-gradient(135deg, #2997ff, #0066cc);
+            color: white; border: none; padding: 14px 30px; border-radius: 30px; 
+            font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; 
+            box-shadow: 0 4px 15px rgba(41, 151, 255, 0.3);
+            transition: all 0.3s ease; letter-spacing: 0.5px; text-transform: uppercase;
+        }
+        .buy-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(41, 151, 255, 0.5); filter: brightness(1.1); }
+        .buy-btn:active { transform: scale(0.98); }
+
+        /* --- 4. COLLECTION --- */
+        #collection { background-color: transparent; }
+        
+        /* Search & Filter Toolbar */
+        .collection-toolbar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 800px; }
+        .search-input { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 10px 15px; border-radius: 20px; outline: none; width: 200px; font-family: inherit; transition: all 0.3s; }
+        .search-input:focus { background: rgba(255, 255, 255, 0.2); border-color: var(--accent-color); width: 220px; }
+        .filter-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #aaa; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; }
+        .filter-btn:hover { background: rgba(255, 255, 255, 0.15); color: white; }
+        .filter-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); box-shadow: 0 4px 10px rgba(41, 151, 255, 0.3); }
+
+        /* Wrapper for arrows + grid */
+        .collection-wrapper { position: relative; width: 100%; max-width: 1000px; display: flex; align-items: center; justify-content: center; }
+
+        /* File Explorer Style Layout (Horizontal Scroll) */
+        .collection-grid {
+            display: flex; flex-wrap: nowrap; overflow-x: auto;  
+            gap: 20px; width: 100%; padding: 40px 20px;
+            background: transparent; border: none; min-height: 300px;
+            align-items: center;
+        }
+        .collection-grid::-webkit-scrollbar { display: none; }
+        
+        /* SMOOTH FLAT CARD STYLE */
+        .collection-item {
+            flex-shrink: 0; width: 150px; height: 220px; 
+            background: rgba(30, 30, 30, 0.8); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px; transform: none; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; align-items: center;
+            position: relative; overflow: hidden; cursor: pointer;
+            backdrop-filter: blur(10px); transition: all 0.3s ease;
+        }
+        .collection-item:hover { 
+            transform: translateY(-10px); border-color: var(--accent-color); 
+            background: rgba(40, 40, 40, 0.9);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px var(--accent-color); z-index: 10; 
+        }
+
+        .card-img-container { width: 100%; height: 150px; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .collection-item:hover .card-img { transform: scale(1.05); }
+        
+        .card-info { padding: 12px; text-align: center; width: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; background: transparent; }
+        .item-rarity { font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.6; letter-spacing: 1px; color: #fff; }
+        .item-name { font-size: 13px; font-weight: 500; color: #f5f5f7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+
+        /* --- 5. PROFILE --- */
+        #personal { background: transparent; }
+        
+        .avatar-circle { 
+            width: 80px; height: 80px; background-color: #333; border-radius: 50%; 
+            margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; 
+            font-size: 30px; cursor: pointer; position: relative; overflow: hidden; 
+            border: 2px solid transparent; transition: border-color 0.3s;
+        }
+        .avatar-circle:hover { border-color: var(--accent-color); }
+        .avatar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; opacity: 0; transition: opacity 0.2s; }
+        .avatar-circle:hover .avatar-overlay { opacity: 1; }
+
+        /* MODALS */
+        .auth-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .auth-card { background: #1c1c1e; width: 90%; max-width: 380px; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid #333; position: relative; }
+        .auth-input { width: 100%; background: #2c2c2e; border: 1px solid #3a3a3c; padding: 12px; border-radius: 10px; color: white; margin-bottom: 10px; }
+        .auth-btn { width: 100%; background: var(--accent-color); color: white; padding: 12px; border: none; border-radius: 10px; margin-top: 10px; cursor: pointer; }
+        .auth-close { position: absolute; top: 15px; right: 15px; color: #666; cursor: pointer; }
+        .auth-switch { margin-top: 20px; font-size: 13px; color: #888; cursor: pointer; }
+        .auth-switch span { color: var(--accent-color); font-weight: 500; }
+
+        /* SETTINGS STYLES */
+        .settings-container { display: flex; height: 350px; text-align: left; }
+        .settings-sidebar { width: 120px; background: #252527; padding: 20px 10px; display: flex; flex-direction: column; gap: 5px; border-right: 1px solid #333; }
+        .settings-content { flex: 1; padding: 25px; overflow-y: auto; position: relative; }
+        .tab-btn { padding: 10px; border-radius: 8px; cursor: pointer; color: #888; font-size: 13px; transition: 0.2s; }
+        .tab-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .tab-btn.active { background: var(--accent-color); color: white; font-weight: 600; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; animation: fadeIn 0.3s; }
+        .color-opt { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+        .color-opt:hover { transform: scale(1.1); }
+        .color-opt.selected { border-color: white; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* TOP UP STYLES */
+        .amount-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .amount-opt { background: #2c2c2e; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .amount-opt:hover { border-color: #666; background: #333; }
+        .amount-opt.selected { border-color: var(--accent-color); background: rgba(41, 151, 255, 0.1); color: var(--accent-color); }
+        .payment-methods { display: flex; flex-direction: column; gap: 10px; }
+        .pay-method-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-radius: 12px; border: none; color: white; font-weight: 600; font-size: 14px; cursor: pointer; transition: transform 0.2s; }
+        .pay-method-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .pay-wechat { background: var(--wechat-green); }
+        .pay-alipay { background: var(--alipay-blue); }
+        .section-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: left; }
+
+        /* GACHA ANIMATIONS */
+        @keyframes shakeBox {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-5px, 5px) rotate(-5deg); }
+            50% { transform: translate(5px, -5px) rotate(5deg); }
+            75% { transform: translate(-5px, 5px) rotate(-5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        @keyframes cardPop {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes whiteFlash {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .anim-shaking { animation: shakeBox 0.1s infinite; }
+        .anim-pop { animation: cardPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .flash-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; border-radius: 12px; z-index: 10; }
+        .anim-flash { animation: whiteFlash 0.5s ease-out; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="starfield"></canvas>
+
+    <!-- Navigation -->
+    <nav class="nav-container">
+        <ul class="nav-links">
+            <li onclick="scrollToSection('introduction')" class="active">Home</li>
+            <li onclick="scrollToSection('faq')">Support</li>
+            <li onclick="scrollToSection('purchase')">Shop</li>
+            <li onclick="scrollToSection('collection')">Collection</li>
+            <li onclick="scrollToSection('personal')">Profile</li>
+            <li onclick="openSettings()" style="cursor: pointer; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'" title="Settings">⚙️</li>
+        </ul>
+        <!-- CHANGED: Hidden Sign In Button -->
+        <button class="nav-login-btn" id="navLoginBtn" onclick="openAuthModal()">Sign In</button>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container" id="mainContainer">
+        
+        <!-- 1. Intro -->
+        <section id="introduction" class="visible">
+            <div class="hero-image">💎</div>
+            <h1>V-Store</h1>
+            <h2>Digital Collectibles.</h2>
+            <p>A premium platform for exclusive Non-Fungible Rights. Verify ownership, unlock benefits, and trade securely.</p>
+            <button class="buy-btn" style="width: auto; margin-top: 20px;" onclick="scrollToSection('collection')">View Collection</button>
+        </section>
+
+        <!-- 2. FAQ & Support -->
+        <section id="faq">
+            <h2>Support</h2>
+            <!-- Added ID for translation -->
+            <p style="margin-bottom: 30px;" id="uiSupportSub">Common questions and live assistance.</p>
+            
+            <div class="faq-wrapper">
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">What is a Blind Box? <span>+</span></div>
+                    <div class="faq-answer">A digital package containing a random collectible card. Probabilities are transparently listed.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">How are ranks calculated? <span>+</span></div>
+                    <div class="faq-answer">Ranks are based on the total 'Marks' value of your collection. SSR cards yield the highest marks.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-question">Is this refundable? <span>+</span></div>
+                    <div class="faq-answer">Digital goods revealed upon purchase are non-refundable.</div>
+                </div>
+            </div>
+
+            <!-- ADDED: Live Agent Trigger -->
+            <button class="agent-trigger" onclick="toggleLiveChat()">
+                <span>💬</span> Chat with Live Agent
+            </button>
+        </section>
+
+        <!-- 3. Shop -->
+        <section id="purchase">
+            <h1>Outlet</h1>
+            <h2 id="productTitle">Series 1</h2>
+            <div class="shop-container">
+                <button class="nav-arrow nav-prev" onclick="changeProduct(-1)">❮</button>
+                <div class="product-card">
+                    <div class="blind-box" id="boxDisplay" style="flex-direction:column; position: relative;">
+                        <!-- NEW: Flash Overlay Div -->
+                        <div id="flashEffect" class="flash-overlay"></div>
+                        
+                        <span style="font-size:60px; transition: all 0.3s;" id="boxIcon">📦</span>
+                        
+                        <!-- Image Container with Initial Hidden State -->
+                        <img id="boxRevealImg" src="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:10px;">
+                    </div>
+                    <span class="price-tag" id="productPrice">¥ 19.90</span>
+                    <button class="buy-btn" onclick="buyBox()">Purchase</button>
+                    <!-- Added ID for translation -->
+                    <p style="font-size: 12px; margin-top: 15px; color:#555;" id="productRates">Rates: N(80%) | SR(15%) | SSR(5%)</p>
+                </div>
+                <button class="nav-arrow nav-next" onclick="changeProduct(1)">❯</button>
+            </div>
+        </section>
+
+        <!-- 4. Collection -->
+        <section id="collection">
+            <h1>My Collection</h1>
+            <!-- Added ID for translation -->
+            <p style="margin-bottom: 20px;" id="uiCollectionSub">Explorer View</p>
+            
+            <!-- NEW: Search and Filter Controls -->
+            <div class="collection-toolbar">
+                <input type="text" class="search-input" id="collectionSearch" placeholder="Search items..." oninput="filterCollection()">
+                
+                <!-- ADDED: IDs for translation -->
+                <button class="filter-btn active" id="btnFilterAll" onclick="setFilter('ALL', this)">ALL</button>
+                <button class="filter-btn" onclick="setFilter('SSR', this)">SSR</button>
+                <button class="filter-btn" onclick="setFilter('SR', this)">SR</button>
+                <button class="filter-btn" onclick="setFilter('N', this)">N</button>
+            </div>
+
+            <div class="collection-wrapper">
+                <button class="nav-arrow nav-prev" onclick="scrollCollection(-1)">❮</button>
+                
+                <div class="collection-grid" id="collectionGrid">
+                    <!-- Cards injected by JS -->
+                </div>
+
+                <button class="nav-arrow nav-next" onclick="scrollCollection(1)">❯</button>
+            </div>
+        </section>
+
+        <!-- 5. Profile -->
+        <section id="personal">
+            <h1 style="margin-bottom:20px;">Profile</h1>
+            <input type="file" id="directAvatarInput" accept="image/*" style="display: none;" onchange="handleDirectAvatarUpload(this)">
+            <div class="avatar-circle" id="profileAvatarContainer" onclick="triggerAvatarUpload()" title="Change Profile Picture">
+                <span id="profileAvatarIcon">👤</span>
+                <div class="avatar-overlay">📷</div>
+            </div>
+            <h3 id="profileName" style="margin-bottom:5px;">User</h3>
+            <p id="profileID" style="font-size:12px; color:#666; margin-bottom:20px;">ID: Guest-001</p>
+            <div style="background:#1d1d1f; padding:20px; border-radius:12px; width:300px; margin-bottom:20px;">
+                <div style="font-size:24px; font-weight:bold; color:#2997ff" id="balanceDisplay">¥ 500.00</div>
+                <!-- Added ID for translation -->
+                <div style="font-size:12px; color:#666;" id="uiBalanceLabel">Balance</div>
+            </div>
+            <div style="display:flex; gap:10px;">
+                 <button class="buy-btn" style="background:#333; width:auto;" onclick="openTopUpModal()">Top Up</button>
+                 <button class="buy-btn" style="background:transparent; border:1px solid #ff3b30; color:#ff3b30; width:auto; display:none;" id="logoutBtn" onclick="handleLogout()">Log Out</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- NEW: CARD DISPLAY PAGE -->
+    <div id="cardDisplayPage">
+        <button onclick="closeCardPage()" style="position: absolute; top: 30px; right: 30px; background: none; border: none; color: white; font-size: 30px; cursor: pointer; z-index:100;">✕</button>
+        <div class="card-scene">
+            <div class="card-object">
+                <!-- THICKNESS LAYERS (High Density for 90-degree Visibility) -->
+                <!-- 20 Layers spaced 0.5px apart to create a solid 10px block -->
+                <div class="card-layer" style="transform: translateZ(-4.5px)"></div>
+                <div class="card-layer" style="transform: translateZ(-4.0px)"></div>
+                <div class="card-layer" style="transform: translateZ(-3.5px)"></div>
+                <div class="card-layer" style="transform: translateZ(-3.0px)"></div>
+                <div class="card-layer" style="transform: translateZ(-2.5px)"></div>
+                <div class="card-layer" style="transform: translateZ(-2.0px)"></div>
+                <div class="card-layer" style="transform: translateZ(-1.5px)"></div>
+                <div class="card-layer" style="transform: translateZ(-1.0px)"></div>
+                <div class="card-layer" style="transform: translateZ(-0.5px)"></div>
+                <div class="card-layer" style="transform: translateZ(0.0px)"></div>
+                <div class="card-layer" style="transform: translateZ(0.5px)"></div>
+                <div class="card-layer" style="transform: translateZ(1.0px)"></div>
+                <div class="card-layer" style="transform: translateZ(1.5px)"></div>
+                <div class="card-layer" style="transform: translateZ(2.0px)"></div>
+                <div class="card-layer" style="transform: translateZ(2.5px)"></div>
+                <div class="card-layer" style="transform: translateZ(3.0px)"></div>
+                <div class="card-layer" style="transform: translateZ(3.5px)"></div>
+                <div class="card-layer" style="transform: translateZ(4.0px)"></div>
+                <div class="card-layer" style="transform: translateZ(4.5px)"></div>
+
+                <!-- FACES -->
+                <!-- Front Face (Pushed to +5px) -->
+                <div class="card-face front">
+                    <!-- CHANGED: Updated text colors for metallic contrast -->
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; font-size: 80px; text-shadow: 2px 2px 5px rgba(0,0,0,0.2);">
+                        💎
+                    </div>
+                    <h2 style="color: #333; margin-bottom: 10px; text-shadow: 1px 1px 0px rgba(255,255,255,0.8);">Genesis Card</h2>
+                    <p style="color: #555; font-size: 14px; line-height: 1.5; text-shadow: 1px 1px 0px rgba(255,255,255,0.5);">This pure platinum card represents infinite possibilities.</p>
+                </div>
+                
+                <!-- Back Face (Pushed to -5px) -->
+                <div class="card-face back">
+                    <div style="font-size: 60px; opacity: 0.2;">💎</div>
+                    <h3 style="margin-top:20px; color:#999;">V-STORE</h3>
+                    <p style="font-size:10px; color:#ccc; margin-top:5px;">Authentic Digital Asset</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIVE CHAT WINDOW -->
+    <div class="live-chat-window" id="liveChat">
+        <div class="chat-header">
+            <div class="agent-info">
+                <div class="agent-avatar">S</div>
+                <!-- ADDED: id="agentName" for translation -->
+                <span id="agentName">Sarah (Support)</span>
+            </div>
+            <button class="close-chat" onclick="toggleLiveChat()">✕</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <!-- ADDED: id="agentWelcome" for translation -->
+            <div class="chat-msg msg-agent" id="agentWelcome">Hi there! 👋 How can I help you with your collection today?</div>
+        </div>
+        <div class="chat-footer">
+            <!-- chatInput already has an ID, we will target its placeholder -->
+            <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendAgentMsg()">
+            <button class="chat-send" onclick="sendAgentMsg()">↑</button>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-card">
+            <span class="auth-close" onclick="closeAuthModal()">✕</span>
+            <h2 style="margin-bottom:20px;" id="authTitle">Sign In</h2>
+            <!-- CHANGED: Username input to Email input -->
+            <input type="email" class="auth-input" id="authEmail" placeholder="Email Address">
+            <input type="password" class="auth-input" id="authPassword" placeholder="Password">
+            <button class="auth-btn" onclick="handleAuthSubmit()" id="authSubmitBtn">Continue</button>
+            <div class="auth-switch" id="authSwitch" onclick="toggleAuthMode()">New user? <span>Create Account</span></div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="auth-modal" id="settingsModal">
+        <div class="auth-card" style="max-width: 550px; padding: 0; overflow: hidden;">
+            <div class="settings-container">
+                <div class="settings-sidebar">
+                    <!-- ADDED: IDs for translation -->
+                    <div class="tab-btn active" id="tabAccountBtn" onclick="switchTab('account', this)">Account</div>
+                    <div class="tab-btn" id="tabLanguageBtn" onclick="switchTab('language', this)">Language</div>
+                </div>
+                <div class="settings-content">
+                    <span class="auth-close" style="top: 15px; right: 15px;" onclick="closeSettings()">✕</span>
+                    
+                    <div id="tab-account" class="tab-pane active">
+                        <!-- ADDED: IDs for translation -->
+                        <h2 style="margin-bottom: 20px;" id="settingsAccountTitle">Account</h2>
+                        <label style="display:block; color:#888; font-size:12px; margin-bottom:5px;" id="settingsAvatarLabel">Avatar</label>
+                        <input type="file" id="editAvatarInput" accept="image/*" class="auth-input" style="padding:8px; font-size:12px;">
+                        <label style="display:block; color:#888; font-size:12px; margin-bottom:5px; margin-top:15px;" id="settingsNameLabel">Nickname</label>
+                        <input type="text" id="editNameInput" class="auth-input" placeholder="Your Name">
+                    </div>
+
+                    <div id="tab-language" class="tab-pane">
+                        <h2 style="margin-bottom: 20px;" id="settingsLangTitle">Language</h2>
+                        <label style="display:block; color:#888; font-size:12px; margin-bottom:5px;" id="settingsRegionLabel">Region</label>
+                        <select id="langSelect" class="auth-input">
+                            <option value="en">English (US)</option>
+                            <option value="zh">Chinese (中文)</option>
+                            <option value="jp">Japanese (日本語)</option>
+                        </select>
+                    </div>
+                    <button class="auth-btn" id="settingsSaveBtn" style="position: absolute; bottom: 20px; right: 20px; width: auto; padding: 10px 25px;" onclick="saveSettings()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOP UP MODAL -->
+    <div class="auth-modal" id="topUpModal">
+        <div class="auth-card" style="max-width: 400px;">
+            <span class="auth-close" onclick="closeTopUpModal()">✕</span>
+            <!-- ADDED: IDs for translation -->
+            <h2 style="margin-bottom:20px;" id="cashierTitle">Cashier</h2>
+            <p class="section-label" id="cashierStep1">1. Select Amount</p>
+            <div class="amount-grid">
+                <button class="amount-opt" onclick="selectAmount(6, this)">¥ 6</button>
+                <button class="amount-opt" onclick="selectAmount(30, this)">¥ 30</button>
+                <button class="amount-opt" onclick="selectAmount(98, this)">¥ 98</button>
+                <button class="amount-opt" onclick="selectAmount(198, this)">¥ 198</button>
+            </div>
+            <p class="section-label" id="cashierStep2">2. Payment Method</p>
+            <div class="payment-methods">
+                <button class="pay-method-btn pay-wechat" onclick="processPayment('WeChat Pay')">
+                    <i class="fab fa-weixin"></i> WeChat Pay
+                </button>
+                <button class="pay-method-btn pay-alipay" onclick="processPayment('Alipay')">
+                    <i class="fab fa-alipay"></i> Alipay
+                </button>
+            </div>
+            <!-- Added ID for translation -->
+            <p style="font-size:11px; color:#666; margin-top:15px;" id="uiSecure">Secure 256-bit SSL encrypted payment.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- STARFIELD ANIMATION LOGIC (NEW: Peaceful & Stable) ---
+        (function() {
+            const canvas = document.getElementById('starfield');
+            if (!canvas) return;
+            const c = canvas.getContext('2d');
+
+            let w, h;
+            const stars = [];
+            const starCount = 200; // Fewer stars for a cleaner look
+
+            function setup() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+                stars.length = 0;
+                for (let i = 0; i < starCount; i++) {
+                    stars.push(new Star());
+                }
+            }
+
+            class Star {
+                constructor() {
+                    this.x = Math.random() * w;
+                    this.y = Math.random() * h;
+                    this.size = Math.random() * 1.5; // Small, distant stars
+                    // Very slow drift
+                    this.speedX = (Math.random() - 0.5) * 0.2; 
+                    this.speedY = (Math.random() - 0.5) * 0.2;
+                    // Twinkle properties
+                    this.opacity = Math.random();
+                    this.fadeSpeed = 0.005 + Math.random() * 0.01;
+                    this.fadeDirection = 1;
+                }
+
+                update() {
+                    // Slow drift
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+
+                    // Wrap around screen
+                    if (this.x < 0) this.x = w;
+                    if (this.x > w) this.x = 0;
+                    if (this.y < 0) this.y = h;
+                    if (this.y > h) this.y = 0;
+
+                    // Twinkle effect
+                    this.opacity += this.fadeSpeed * this.fadeDirection;
+                    if (this.opacity > 1 || this.opacity < 0.2) {
+                        this.fadeDirection *= -1;
+                    }
+                }
+
+                draw() {
+                    c.beginPath();
+                    c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    c.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    c.fill();
+                }
+            }
+
+            function animate() {
+                c.clearRect(0, 0, w, h); // Clear frame completely for crisp stars
+                
+                stars.forEach(star => {
+                    star.update();
+                    star.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', setup);
+            setup();
+            animate();
+        })();
+
+        // --- APP LOGIC ---
+        let nfrCount = 0;
+        let userCollection = []; 
+        
+        // RESTORED: Secure State (Logged Out by default)
+        let currentBalance = 0.00; 
+        let isLoggedIn = false; 
+        let currentUser = null;
+        let currentLang = 'en'; 
+        
+        let selectedTopUpAmount = 0;
+        let currentProductIndex = 0;
+
+        // NEW: Translation Dictionary
+        const translations = {
+            en: {
+                nav: ["Home", "Support", "Shop", "Collection", "Profile"],
+                introH1: "V-Store",
+                introH2: "Digital Collectibles.",
+                introP: "A premium platform for exclusive Non-Fungible Rights. Verify ownership, unlock benefits, and trade securely.",
+                introBtn: "View Collection",
+                supportH2: "Support",
+                suppSub: "Common questions and live assistance.",
+                shopH1: "Outlet",
+                shopBtn: "Purchase",
+                collectionH1: "My Collection",
+                collSub: "Explorer View",
+                profileH1: "Profile",
+                balanceLabel: "Balance",
+                topupBtn: "Top Up",
+                logoutBtn: "Log Out",
+                // FAQ & Agent
+                faqQ1: "What is a Blind Box?",
+                faqA1: "A digital package containing a random collectible card. Probabilities are transparently listed.",
+                faqQ2: "How are ranks calculated?",
+                faqA2: "Ranks are based on the total 'Marks' value of your collection. SSR cards yield the highest marks.",
+                faqQ3: "Is this refundable?",
+                faqA3: "Digital goods revealed upon purchase are non-refundable.",
+                agentBtn: "Chat with Live Agent",
+                // NEW: Chat Window Translations
+                agentName: "Sarah (Support)",
+                agentWelcome: "Hi there! 👋 How can I help you with your collection today?",
+                chatPlaceholder: "Type a message...",
+                // NEW: Dynamic Reply Translation
+                agentReply: "Thanks for your message. An agent will be with you shortly (Position: 1 in queue).",
+                // Settings
+                tabAccount: "Account",
+                tabLang: "Language",
+                setAccTitle: "Account",
+                setAvatar: "Avatar",
+                setName: "Nickname",
+                setLangTitle: "Language",
+                setRegion: "Region",
+                setSave: "Save Changes",
+                // Cashier
+                cashierTitle: "Cashier",
+                cashStep1: "1. Select Amount",
+                cashStep2: "2. Payment Method",
+                cashSecure: "Secure 256-bit SSL encrypted payment.",
+                // Rates Prefix
+                ratesPrefix: "Rates: ",
+                // NEW: Collection Search & Filters
+                searchPlaceholder: "Search items...",
+                filterAll: "ALL"
+            },
+            zh: {
+                nav: ["首页", "支持", "商店", "收藏", "我的"],
+                introH1: "V-Store",
+                introH2: "数字藏品",
+                introP: "独家非同质化权益的高级平台。验证所有权，解锁福利，安全交易。",
+                introBtn: "查看收藏",
+                supportH2: "客户支持",
+                suppSub: "常见问题与实时帮助。",
+                shopH1: "奥特莱斯",
+                shopBtn: "购买",
+                collectionH1: "我的收藏",
+                collSub: "资源管理器视图",
+                profileH1: "个人资料",
+                balanceLabel: "余额",
+                topupBtn: "充值",
+                logoutBtn: "登出",
+                // FAQ & Agent
+                faqQ1: "什么是盲盒？",
+                faqA1: "一个包含随机数字卡片的包裹。概率已透明列出。",
+                faqQ2: "排名如何计算？",
+                faqA2: "排名基于您收藏的总“分数”。SSR卡片分数最高。",
+                faqQ3: "可以退款吗？",
+                faqA3: "购买即开启的数字商品不支持退款。",
+                agentBtn: "联系在线客服",
+                // NEW: Chat Window Translations
+                agentName: "莎拉 (客服)",
+                agentWelcome: "你好！👋 今天关于您的收藏有什么可以帮您的吗？",
+                chatPlaceholder: "输入消息...",
+                // NEW: Dynamic Reply Translation
+                agentReply: "感谢您的留言。客服人员稍后将为您服务（排队位置：1）。",
+                // Settings
+                tabAccount: "账户",
+                tabLang: "语言",
+                setAccTitle: "账户设置",
+                setAvatar: "头像",
+                setName: "昵称",
+                setLangTitle: "语言设置",
+                setRegion: "地区",
+                setSave: "保存更改",
+                // Cashier
+                cashierTitle: "收银台",
+                cashStep1: "1. 选择金额",
+                cashStep2: "2. 支付方式",
+                cashSecure: "256位 SSL 加密安全支付。",
+                // Rates Prefix
+                ratesPrefix: "概率: ",
+                // NEW: Collection Search & Filters
+                searchPlaceholder: "搜索藏品...",
+                filterAll: "全部"
+            },
+            jp: {
+                nav: ["ホーム", "サポート", "ショップ", "コレクション", "プロフィール"],
+                introH1: "V-Store",
+                introH2: "デジタルコレクション",
+                introP: "独占的な非代替性権利のためのプレミアムプラットフォーム。所有権の確認、特典のロック解除、安全な取引。",
+                introBtn: "コレクションを見る",
+                supportH2: "サポート",
+                suppSub: "よくある質問とライブアシスタンス。",
+                shopH1: "アウトレット",
+                shopBtn: "購入",
+                collectionH1: "マイコレクション",
+                collSub: "エクスプローラー表示",
+                profileH1: "プロフィール",
+                balanceLabel: "残高",
+                topupBtn: "チャージ",
+                logoutBtn: "ログアウト",
+                // FAQ & Agent
+                faqQ1: "ブラインドボックスとは？",
+                faqA1: "ランダムな収集可能なカードが含まれているデジタルパッケージ。確率は透明にリストされています。",
+                faqQ2: "ランクはどのように計算されますか？",
+                faqA2: "ランクは、コレクションの合計「マーク」値に基づいています。SSRカードが最も高いマークをもたらします。",
+                faqQ3: "返金は可能ですか？",
+                faqA3: "購入時に開封されるデジタル商品は返金不可です。",
+                agentBtn: "ライブエージェントとチャット",
+                // NEW: Chat Window Translations
+                agentName: "サラ (サポート)",
+                agentWelcome: "こんにちは！👋 コレクションについて何かお手伝いしましょうか？",
+                chatPlaceholder: "メッセージを入力...",
+                // NEW: Dynamic Reply Translation
+                agentReply: "メッセージありがとうございます。まもなく担当者が対応いたします（待ち順：1番目）。",
+                // Settings
+                tabAccount: "アカウント",
+                tabLang: "言語",
+                setAccTitle: "アカウント設定",
+                setAvatar: "アバター",
+                setName: "ニックネーム",
+                setLangTitle: "言語設定",
+                setRegion: "地域",
+                setSave: "変更を保存",
+                // Cashier
+                cashierTitle: "レジ",
+                cashStep1: "1. 金額を選択",
+                cashStep2: "2. 支払い方法",
+                cashSecure: "256ビットSSL暗号化された安全な支払い。",
+                // Rates Prefix
+                ratesPrefix: "確率: ",
+                // NEW: Collection Search & Filters
+                searchPlaceholder: "アイテムを検索...",
+                filterAll: "すべて"
+            }
+        };
+
+        const products = [
+            {
+                id: 0,
+                title: 'Series 1: "Neon Genesis"',
+                price: 19.90,
+                // rates: 'Rates: N(80%) | SR(15%) | SSR(5%)', // Ignored now
+                icon: '📦',
+                ssrChance: 0.05,
+                srChance: 0.20
+            },
+            {
+                id: 1,
+                title: 'Series 2: "Cyber Angel"',
+                price: 29.90,
+                // rates: 'Rates: N(70%) | SR(25%) | SSR(5%)',
+                icon: '🔮',
+                ssrChance: 0.05,
+                srChance: 0.30
+            },
+            {
+                id: 2,
+                title: 'Series 3: "Golden Era"',
+                price: 49.90,
+                // rates: 'High Rates: N(50%) | SR(40%) | SSR(10%)',
+                icon: '🏆',
+                ssrChance: 0.10,
+                srChance: 0.50
+            }
+        ];
+
+        // Navigation Scroll
+        function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+        
+        const container = document.getElementById('mainContainer');
+        const sections = document.querySelectorAll('section');
+        const navItems = document.querySelectorAll('.nav-links li');
+        
+        container.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                if (container.scrollTop >= (section.offsetTop - section.clientHeight / 3)) {
+                    current = section.getAttribute('id');
+                    section.classList.add('visible');
+                }
+            });
+            navItems.forEach(li => {
+                li.classList.remove('active');
+                if(li.innerText.toLowerCase().includes('home') && current==='introduction') li.classList.add('active');
+                if(li.innerText.toLowerCase().includes('support') && current==='faq') li.classList.add('active');
+                if(li.innerText.toLowerCase().includes('shop') && current==='purchase') li.classList.add('active');
+                if(li.innerText.toLowerCase().includes('collection') && current==='collection') li.classList.add('active');
+                if(li.innerText.toLowerCase().includes('profile') && current==='personal') li.classList.add('active');
+            });
+        });
+
+        // FAQ Toggle
+        function toggleFaq(el) { 
+            if (el && el.classList) {
+                el.classList.toggle('active'); 
+            }
+        }
+
+        // Live Chat Logic
+        function toggleLiveChat() {
+            const chat = document.getElementById('liveChat');
+            if(chat.style.display === 'flex') {
+                chat.style.display = 'none';
+            } else {
+                chat.style.display = 'flex';
+            }
+        }
+
+        function sendAgentMsg() {
+            const input = document.getElementById('chatInput');
+            const body = document.getElementById('chatBody');
+            const txt = input.value.trim();
+            if(!txt) return;
+
+            // User Msg
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-msg msg-user';
+            userDiv.innerText = txt;
+            body.appendChild(userDiv);
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+
+            // Fake Agent Typing
+            setTimeout(() => {
+                const agentDiv = document.createElement('div');
+                agentDiv.className = 'chat-msg msg-agent';
+                
+                // FIXED: Use Translation for Reply
+                const t = translations[currentLang] || translations['en'];
+                agentDiv.innerText = t.agentReply; 
+                
+                body.appendChild(agentDiv);
+                body.scrollTop = body.scrollHeight;
+            }, 1000);
+        }
+
+        // SHOP LOGIC
+        function changeProduct(direction) {
+            currentProductIndex += direction;
+            if (currentProductIndex < 0) currentProductIndex = products.length - 1;
+            if (currentProductIndex >= products.length) currentProductIndex = 0;
+            updateProductDisplay();
+        }
+
+        function updateProductDisplay() {
+            const p = products[currentProductIndex];
+            const t = translations[currentLang] || translations['en'];
+
+            document.getElementById('productTitle').innerText = p.title;
+            document.getElementById('productPrice').innerText = "¥ " + p.price.toFixed(2);
+            
+            // DYNAMIC RATES TRANSLATION
+            const nRate = Math.round((1 - p.ssrChance - p.srChance) * 100);
+            const srRate = Math.round(p.srChance * 100);
+            const ssrRate = Math.round(p.ssrChance * 100);
+            document.getElementById('productRates').innerText = `${t.ratesPrefix}N(${nRate}%) | SR(${srRate}%) | SSR(${ssrRate}%)`;
+
+            document.getElementById('boxIcon').innerText = p.icon;
+            document.getElementById('boxIcon').style.display = 'block';
+            document.getElementById('boxRevealImg').style.display = 'none';
+            document.getElementById('boxDisplay').style.border = "none";
+            document.getElementById('boxDisplay').style.background = "#2c2c2e";
+        }
+
+        function buyBox() {
+            // RESTORED: Login Check
+            if(!isLoggedIn) { alert("Please sign in to purchase items."); openAuthModal(); return; }
+            
+            const currentProduct = products[currentProductIndex];
+
+            // CHECK BALANCE
+            if(currentBalance < currentProduct.price) {
+                alert("Insufficient balance! Please Top Up.");
+                openTopUpModal();
+                return;
+            }
+
+            // DEDUCT BALANCE
+            currentBalance -= currentProduct.price;
+            document.getElementById('balanceDisplay').innerText = "¥ " + currentBalance.toFixed(2);
+
+            // ANIMATION ELEMENTS
+            const box = document.getElementById('boxDisplay');
+            const boxIcon = document.getElementById('boxIcon');
+            const boxImg = document.getElementById('boxRevealImg');
+            const flash = document.getElementById('flashEffect');
+            const btn = document.querySelector('#purchase .buy-btn');
+            
+            // 1. DISABLE BUTTON
+            btn.disabled = true;
+            btn.innerText = "Opening...";
+
+            // 2. RESET STATE
+            boxIcon.style.display = 'block';
+            boxImg.style.display = 'none';
+            boxImg.className = ''; // Remove pop class
+            box.style.background = "#2c2c2e";
+            box.style.border = "none";
+            
+            // 3. START SHAKE (Anticipation)
+            boxIcon.innerText = currentProduct.icon; // Ensure correct icon
+            boxIcon.classList.add('anim-shaking');
+            
+            // 4. PRE-CALCULATE RESULT (Behind the scenes)
+            let r = Math.random();
+            let res = "N"; let col="#888"; let name="Standard Item";
+            let imgUrl = "https://placehold.co/300x400/333/999?text=N-Card";
+
+            if(r > (1 - currentProduct.ssrChance)) { 
+                res="SSR"; col="#ffd700"; name="Golden Idol"; 
+                imgUrl="https://placehold.co/300x400/443300/ffd700?text=SSR-GOLD";
+            }
+            else if(r > (1 - currentProduct.srChance)) { 
+                res="SR"; col="#2997ff"; name="Cyber Stage";
+                imgUrl="https://placehold.co/300x400/001133/2997ff?text=SR-Rare";
+            }
+
+            // 5. TRIGGER REVEAL (after 1s)
+            setTimeout(() => {
+                // Stop Shake
+                boxIcon.classList.remove('anim-shaking');
+                boxIcon.style.display = 'none';
+                
+                // Flash Effect
+                flash.classList.add('anim-flash');
+                setTimeout(() => flash.classList.remove('anim-flash'), 500);
+
+                // Show Image with Pop
+                boxImg.src = imgUrl;
+                boxImg.style.display = 'block';
+                boxImg.classList.add('anim-pop');
+                
+                // Set Glow/Border based on rarity
+                box.style.border = "4px solid " + col; 
+                box.style.boxShadow = `0 0 30px ${col}40`; // Add colored glow
+                
+                // Add to Collection
+                userCollection.push({ rarity: res, color: col, name: name, img: imgUrl });
+                renderCollection();
+                
+                // Reset Button
+                btn.disabled = false;
+                btn.innerText = "Purchase Again";
+
+            }, 1000); 
+        }
+
+        function openSettings() {
+            // RESTORED: Login Check
+            if (!isLoggedIn) {
+                alert("Please log in to access settings.");
+                openAuthModal();
+                return;
+            }
+            // Pre-fill data
+            document.getElementById('editNameInput').value = currentUser;
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function switchTab(tabName, btnElement) {
+            // Update Tab Buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // Update Content
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        function selectTheme(color, el) {
+            // Function removed as requested
+        }
+
+        function saveSettings() {
+            // 1. Save Account Info
+            const newName = document.getElementById('editNameInput').value.trim();
+            const fileInput = document.getElementById('editAvatarInput');
+            
+            if (newName) {
+                currentUser = newName;
+                document.getElementById('profileName').innerText = newName;
+            }
+
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatarContainer = document.getElementById('profileAvatarContainer');
+                    avatarContainer.style.backgroundImage = `url(${e.target.result})`;
+                    avatarContainer.style.backgroundSize = 'cover';
+                    avatarContainer.style.backgroundPosition = 'center';
+                    document.getElementById('profileAvatarIcon').style.display = 'none';
+                }
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+
+            // 2. Apply Language
+            const lang = document.getElementById('langSelect').value;
+            applyLanguage(lang);
+
+            closeSettings();
+        }
+
+        // NEW: Apply Language Function
+        function applyLanguage(lang) {
+            currentLang = lang; // Store global state
+            const t = translations[lang];
+            if (!t) return;
+
+            // Nav
+            const navItems = document.querySelectorAll('.nav-links li');
+            // Skip the last item (Settings icon)
+            for(let i=0; i < navItems.length - 1; i++) {
+                if(t.nav[i]) navItems[i].innerText = t.nav[i];
+            }
+
+            // Intro
+            document.querySelector('#introduction h1').innerText = t.introH1;
+            document.querySelector('#introduction h2').innerText = t.introH2;
+            document.querySelector('#introduction p').innerText = t.introP;
+            document.querySelector('#introduction .buy-btn').innerText = t.introBtn;
+
+            // Support
+            document.querySelector('#faq h2').innerText = t.supportH2;
+            // FIXED: Target new ID
+            document.getElementById('uiSupportSub').innerText = t.suppSub;
+            
+            // Translate FAQ Items
+            const faqItems = document.querySelectorAll('.faq-item');
+            if(faqItems[0]) {
+                faqItems[0].querySelector('.faq-question').innerHTML = t.faqQ1 + " <span>+</span>";
+                faqItems[0].querySelector('.faq-answer').innerText = t.faqA1;
+            }
+            if(faqItems[1]) {
+                faqItems[1].querySelector('.faq-question').innerHTML = t.faqQ2 + " <span>+</span>";
+                faqItems[1].querySelector('.faq-answer').innerText = t.faqA2;
+            }
+            if(faqItems[2]) {
+                faqItems[2].querySelector('.faq-question').innerHTML = t.faqQ3 + " <span>+</span>";
+                faqItems[2].querySelector('.faq-answer').innerText = t.faqA3;
+            }
+            // Translate Agent Button
+            const agentBtn = document.querySelector('.agent-trigger');
+            if(agentBtn) agentBtn.innerHTML = `<span>💬</span> ${t.agentBtn}`;
+
+            // NEW: Translate Chat Window Contents
+            document.getElementById('agentName').innerText = t.agentName;
+            document.getElementById('agentWelcome').innerText = t.agentWelcome;
+            document.getElementById('chatInput').placeholder = t.chatPlaceholder;
+
+            // Shop
+            document.querySelector('#purchase h1').innerText = t.shopH1;
+            document.querySelector('#purchase .buy-btn').innerText = t.shopBtn;
+            // Update rates dynamically
+            updateProductDisplay();
+
+            // Collection
+            document.querySelector('#collection h1').innerText = t.collectionH1;
+            document.getElementById('uiCollectionSub').innerText = t.collSub;
+            
+            // NEW: Translate Collection Search & Filters
+            document.getElementById('collectionSearch').placeholder = t.searchPlaceholder;
+            document.getElementById('btnFilterAll').innerText = t.filterAll;
+
+            // Profile
+            document.querySelector('#personal h1').innerText = t.profileH1;
+            document.getElementById('uiBalanceLabel').innerText = t.balanceLabel;
+
+            // Buttons
+            const personalBtns = document.querySelectorAll('#personal .buy-btn');
+            if(personalBtns[0]) personalBtns[0].innerText = t.topupBtn;
+            if(personalBtns[1]) personalBtns[1].innerText = t.logoutBtn;
+
+            // NEW: Translate Settings Modal
+            document.getElementById('tabAccountBtn').innerText = t.tabAccount;
+            document.getElementById('tabLanguageBtn').innerText = t.tabLang;
+            document.getElementById('settingsAccountTitle').innerText = t.setAccTitle;
+            document.getElementById('settingsAvatarLabel').innerText = t.setAvatar;
+            document.getElementById('settingsNameLabel').innerText = t.setName;
+            document.getElementById('settingsLangTitle').innerText = t.setLangTitle;
+            document.getElementById('settingsRegionLabel').innerText = t.setRegion;
+            document.getElementById('settingsSaveBtn').innerText = t.setSave;
+
+            // NEW: Translate Cashier Modal
+            document.getElementById('cashierTitle').innerText = t.cashierTitle;
+            document.getElementById('cashierStep1').innerText = t.cashStep1;
+            document.getElementById('cashierStep2').innerText = t.cashStep2;
+            document.getElementById('uiSecure').innerText = t.cashSecure;
+        }
+
+        // --- NEW TOP UP LOGIC ---
+        function openTopUpModal() {
+            // RESTORED: Login Check
+            if(!isLoggedIn) { alert("Please login to add funds."); openAuthModal(); return; }
+            
+            selectedTopUpAmount = 0; // Reset
+            // Reset Visuals
+            document.querySelectorAll('.amount-opt').forEach(b => b.classList.remove('selected'));
+            document.getElementById('topUpModal').style.display = 'flex';
+        }
+
+        function closeTopUpModal() {
+            document.getElementById('topUpModal').style.display = 'none';
+        }
+
+        function selectAmount(amount, btn) {
+            selectedTopUpAmount = amount;
+            document.querySelectorAll('.amount-opt').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        function processPayment(method) {
+            if (selectedTopUpAmount === 0) {
+                alert("Please select an amount first!");
+                return;
+            }
+            
+            // Simulating API call
+            // Removed alert for smoother flow, just update balance
+            
+            // Update Balance
+            currentBalance += selectedTopUpAmount;
+            document.getElementById('balanceDisplay').innerText = "¥ " + currentBalance.toFixed(2);
+            closeTopUpModal();
+        }
+
+        // --- RESTORED: AUTH LOGIC (MISSING FUNCTIONS) ---
+        let currentAuthMode = 'login';
+
+        function openAuthModal(mode = 'login') { 
+            currentAuthMode = mode;
+            updateAuthUI();
+            document.getElementById('authModal').style.display='flex'; 
+        }
+        
+        function closeAuthModal() { document.getElementById('authModal').style.display='none'; }
+        
+        function toggleAuthMode() {
+            currentAuthMode = currentAuthMode === 'login' ? 'signup' : 'login';
+            updateAuthUI();
+        }
+
+        function updateAuthUI() {
+            const title = document.getElementById('authTitle');
+            const btn = document.getElementById('authSubmitBtn');
+            const switchLink = document.getElementById('authSwitch');
+
+            if (currentAuthMode === 'login') {
+                title.innerText = "Sign In";
+                btn.innerText = "Continue";
+                switchLink.innerHTML = "New user? <span>Create Account</span>";
+            } else {
+                title.innerText = "Create Account";
+                btn.innerText = "Sign Up";
+                switchLink.innerHTML = "Already have an account? <span>Sign In</span>";
+            }
+        }
+
+        function handleAuthSubmit() {
+            // CHANGED: Get value from Email input
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            
+            if(!email || !email.includes('@')) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+            
+            // LOG IN SUCCESS
+            isLoggedIn = true; 
+            // Extract nickname from email (e.g. "john" from "john@example.com")
+            const nickname = email.split('@')[0];
+            currentUser = nickname;
+            
+            // Give Welcome Bonus if balance is 0
+            if(currentBalance === 0) {
+                currentBalance = 100.00;
+                alert(`Welcome, ${nickname}! You received a ¥100.00 starter bonus.`);
+            } else {
+                alert(`Welcome back, ${nickname}!`);
+            }
+            
+            // UI Updates
+            document.getElementById('profileName').innerText = nickname;
+            document.getElementById('balanceDisplay').innerText = "¥ " + currentBalance.toFixed(2);
+            document.getElementById('navLoginBtn').innerText = "Sign Out";
+            document.getElementById('navLoginBtn').onclick = handleLogout;
+            document.getElementById('logoutBtn').style.display = 'block';
+            
+            closeAuthModal(); 
+        }
+
+        function handleLogout() {
+            isLoggedIn = false; // Log out
+            currentUser = "Guest";
+            currentBalance = 0.00; // Reset balance
+            document.getElementById('balanceDisplay').innerText = "¥ 0.00";
+            document.getElementById('profileName').innerText = "Guest";
+            userCollection = []; // Clear collection on logout
+            
+            // Reset Avatar
+            const avatarContainer = document.getElementById('profileAvatarContainer');
+            if(avatarContainer) {
+                avatarContainer.style.backgroundImage = 'none';
+                const icon = document.getElementById('profileAvatarIcon');
+                if(icon) icon.style.display = 'block';
+            }
+
+            // Reset Nav Button
+            const navBtn = document.getElementById('navLoginBtn');
+            navBtn.innerText = "Sign In";
+            navBtn.style.display = "block";
+            navBtn.onclick = () => openAuthModal('login');
+            
+            document.getElementById('logoutBtn').style.display = 'none';
+            
+            renderCollection();
+            alert("Logged out.");
+        }
+
+        // --- NEW: CARD DISPLAY LOGIC WITH DRAG ---
+        let isDraggingCard = false;
+        let startX = 0;
+        let currentRotation = 0;
+        const cardObject = document.querySelector('.card-object');
+        const cardScene = document.querySelector('.card-scene');
+
+        // Mouse Down
+        cardScene.addEventListener('mousedown', (e) => {
+            isDraggingCard = true;
+            startX = e.pageX;
+            cardObject.style.transition = 'none'; // Instant tracking
+        });
+
+        // Mouse Move
+        window.addEventListener('mousemove', (e) => {
+            if (!isDraggingCard) return;
+            const x = e.pageX;
+            const walk = (x - startX) * 0.5; // Rotation speed
+            cardObject.style.transform = `rotateY(${currentRotation + walk}deg)`;
+        });
+
+        // Mouse Up
+        window.addEventListener('mouseup', (e) => {
+            if (!isDraggingCard) return;
+            isDraggingCard = false;
+            const x = e.pageX;
+            const walk = (x - startX) * 0.5;
+            currentRotation += walk;
+            cardObject.style.transition = 'transform 0.5s ease-out'; // Smooth stop
+        });
+
+        function openCardPage() {
+            document.getElementById('cardDisplayPage').style.display = 'flex';
+            // Reset position on open
+            currentRotation = 0;
+            cardObject.style.transform = `rotateY(0deg)`;
+        }
+        
+        function closeCardPage() {
+            document.getElementById('cardDisplayPage').style.display = 'none';
+        }
+
+        // --- NEW: DIRECT AVATAR UPLOAD LOGIC ---
+        function triggerAvatarUpload() {
+            // RESTORED: Login Check
+            if (!isLoggedIn) { alert("Please login to change avatar."); openAuthModal(); return; }
+            document.getElementById('directAvatarInput').click();
+        }
+
+        function handleDirectAvatarUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatarContainer = document.getElementById('profileAvatarContainer');
+                    
+                    // Set image as background
+                    avatarContainer.style.backgroundImage = `url(${e.target.result})`;
+                    avatarContainer.style.backgroundSize = 'cover';
+                    avatarContainer.style.backgroundPosition = 'center';
+                    
+                    // Hide the default emoji icon
+                    const icon = document.getElementById('profileAvatarIcon');
+                    if(icon) icon.style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // --- NEW: FILTER LOGIC ---
+        let currentFilter = 'ALL';
+        
+        function setFilter(type, btn) {
+            currentFilter = type;
+            // Update UI
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderCollection();
+        }
+
+        function filterCollection() {
+            // Triggered by search input
+            renderCollection();
+        }
+
+        // --- NEW: Render Collection Logic (Defined before call) ---
+        function renderCollection() {
+            const grid = document.getElementById('collectionGrid');
+            grid.innerHTML = "";
+            
+            // REMOVED: Genesis Card Logic
+            /*
+            const genesis = document.createElement('div');
+            genesis.className = 'pure-white-card';
+            genesis.onclick = openCardPage;
+            genesis.innerHTML = `<div style="font-size: 40px;">🃏</div><span style="font-size: 11px; margin-top: 10px; color: #999; font-weight: 500;">Genesis Card</span>`;
+            grid.appendChild(genesis);
+            */
+
+            // Check if empty
+            if (userCollection.length === 0) {
+                grid.innerHTML = `<div style="color: #666; width: 100%; text-align: center; margin-top: 50px;">Collection is empty.<br>Visit the Outlet to start!</div>`;
+                grid.style.justifyContent = 'center';
+                return;
+            }
+
+            // User Collection
+            userCollection.forEach((item, i) => {
+                const card = document.createElement('div');
+                card.className = 'collection-item';
+                const imgSrc = item.img || `https://placehold.co/300x400/222/FFF?text=${item.rarity}`;
+                card.innerHTML = `
+                    <div class="card-img-container"><img src="${imgSrc}" class="card-img" alt="${item.name}"></div>
+                    <div class="card-info"><div class="item-rarity" style="color:${item.color}">${item.rarity}</div><div class="item-name">${item.name}</div></div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            // Center alignment check logic
+            if (grid.scrollWidth > grid.clientWidth) {
+                grid.style.justifyContent = 'flex-start';
+            } else {
+                grid.style.justifyContent = 'center';
+            }
+        }
+        
+        // NEW: Scroll Collection Logic
+        window.scrollCollection = function(direction) {
+            const grid = document.getElementById('collectionGrid');
+            const scrollAmount = 200; 
+            grid.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
+
+        // --- INITIALIZATION ---
+        // FIXED: Run this immediately so the Genesis Card appears!
+        renderCollection();
+
+    </script>
+</body>
+</html>
